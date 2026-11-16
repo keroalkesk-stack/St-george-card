@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صانع يفط تهنئة كشافة سان جورج | الكريسماس والعام الجديد</title>
+    
+    <!-- تحميل مكتبة Tailwind CSS للتصميم المتجاوب -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- تحميل خطوط عربية قوية مناسبة ليفط الشوارع والتهاني -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Reem+Kufi:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ضبط الخط الافتراضي للصفحة */
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        /* تحسين شكل شريط التمرير (Sliders) */
+        input[type="range"] {
+            accent-color: #eab308;
+            cursor: pointer;
+        }
+
+        /* تأثير نبض خفيف لزر التحميل */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.5); }
+            50% { box-shadow: 0 0 20px 4px rgba(234, 179, 8, 0.35); }
+        }
+        .btn-glow {
+            animation: pulseGlow 2.5s infinite;
+        }
+
+        /* منع التحديد أثناء سحب الصورة داخل الكانفاس */
+        canvas {
+            touch-action: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-gradient-to-br from-slate-950 via-red-950/40 to-slate-950">
+
+    <!-- الهيدر العلوي -->
+    <header class="bg-slate-900/85 backdrop-blur-md border-b border-yellow-500/30 sticky top-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- أيقونة شعار كشافة سان جورج (تتحدث تلقائياً إذا وُجد logo.png في نفس الفولدر) -->
+                <div id="headerLogoContainer" class="w-11 h-11 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-yellow-500/20 border-2 border-yellow-400 text-slate-950 shrink-0 overflow-hidden p-0.5">
+                    <img id="headerLogoImg" src="" alt="شعار كشافة سان جورج" class="w-full h-full object-contain hidden">
+                    <svg id="headerLogoSvg" class="w-8 h-8" viewBox="0 0 100 100" fill="currentColor">
+                        <!-- زهرة الزنبق مع الصليب -->
+                        <path d="M50 8 C42 22 37 33 37 44 C37 50 41 54 46 56 L46 47 L35 47 L35 41 L46 41 L46 28 L54 28 L54 41 L65 41 L65 47 L54 47 L54 56 C59 54 63 50 63 44 C63 33 58 22 50 8 Z"/>
+                        <path d="M36 46 C23 40 14 50 18 62 C21 70 31 71 39 66 C32 65 27 60 28 54 C29 50 32 48 36 46 Z"/>
+                        <path d="M64 46 C77 40 86 50 82 62 C79 70 69 71 61 66 C68 65 73 60 72 54 C71 50 68 48 64 46 Z"/>
+                        <path d="M45 56 L55 56 L55 82 L50 92 L45 82 Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-xl font-black text-yellow-400 tracking-wide">صانع يفط كشافة سان جورج 🎄</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-300">كنيسة الشهيد العظيم مارجرجس ببا • مطرانية ببا والفشن وسمسطا</p>
+                </div>
+            </div>
+
+            <!-- زر فتح إعدادات القائد لمشاركة رابط مخصص -->
+            <button id="toggleLeaderModalBtn" type="button" class="text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-yellow-500/40 px-3 py-2 rounded-xl font-bold transition flex items-center gap-1.5">
+                <span>⚜️</span>
+                <span>رابط للقائد</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي: تقسيم متجاوب للمعاينة وأدوات التحكم -->
+    <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-grow">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- القسم الأول: معاينة اليافطة (يظهر في الأعلى على الموبايل وعلى اليسار في الشاشات الكبيرة) -->
+            <div class="lg:col-span-7 lg:sticky lg:top-20 flex flex-col gap-3">
+                <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-2xl">
+                    <div class="flex items-center justify-between mb-2.5 px-1">
+                        <span class="text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            معاينة مباشرة لليافطة
+                        </span>
+                        <!-- اختيار مقاس اليافطة -->
+                        <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs">
+                            <button type="button" id="ratioWideBtn" class="px-2.5 py-1 rounded-lg font-bold bg-yellow-500 text-slate-950 transition">يافطة عريضة (فيسبوك)</button>
+                            <button type="button" id="ratioSquareBtn" class="px-2.5 py-1 rounded-lg font-bold text-slate-300 hover:text-white transition">مربع (بروفايل/حالة)</button>
+                        </div>
+                    </div>
+
+                    <!-- حاوية الكانفاس -->
+                    <div class="relative w-full rounded-xl overflow-hidden shadow-inner bg-slate-950 border border-slate-800 flex items-center justify-center">
+                        <canvas id="bannerCanvas" class="w-full h-auto block cursor-move"></canvas>
+                    </div>
+
+                    <p class="text-[11px] sm:text-xs text-slate-400 text-center mt-2">
+                        💡 تلميح: تقدر تسحب صورتك بإيدك جوه البرواز عشان تظبط مكانها بالظبط!
+                    </p>
+                </div>
+
+                <!-- أزرار التحميل والمشاركة السريعة -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button id="downloadBtn" type="button" class="sm:col-span-2 btn-glow bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-slate-950 font-black text-base sm:text-lg py-3.5 px-6 rounded-2xl shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span>تحميل اليافطة (جودة عالية)</span>
+                    </button>
+
+                    <button id="previewImageBtn" type="button" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold text-sm py-3.5 px-4 rounded-2xl transition flex items-center justify-center gap-2">
+                        <span>📱</span>
+                        <span>حفظ للموبايل (واتساب)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- القسم الثاني: لوحة إدخال البيانات والتخصيص -->
+            <div class="lg:col-span-5 flex flex-col gap-4">
+                
+                <!-- بطاقة 1: البيانات الشخصية -->
+                <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-xl">
+                    <h2 class="text-base sm:text-lg font-black text-yellow-400 mb-4 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                        <span class="bg-yellow-500/20 text-yellow-400 w-7 h-7 rounded-lg flex items-center justify-center text-sm">1</span>
+                        <span>اكتب بياناتك يا بطل</span>
+                    </h2>
+
+                    <div class="space-y-4">
+                        <!-- اللقب / الرتبة الكشفية -->
+                        <div>
+                            <label for="rankSelect" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">الرتبة / اللقب</label>
+                            <select id="rankSelect" class="w-full bg-slate-800 border border-slate-600 focus:border-yellow-400 rounded-xl px-3.5 py-2.5 text-white font-bold outline-none transition">
+                                <option value="الكشاف">الكشاف</option>
+                                <option value="الكشاف المتقدم">الكشاف المتقدم</option>
+                                <option value="الشبل">الشبل</option>
+                                <option value="الزهرة">الزهرة</option>
+                                <option value="المرشدة">المرشدة</option>
+                                <option value="الجوال">الجوال</option>
+                                <option value="الجوالة">الجوالة</option>
+                                <option value="القائد">القائد</option>
+                                <option value="القائدة">القائدة</option>
+                                <option value="أمين المجموعة">أمين المجموعة</option>
+                                <option value="الأستاذ">الأستاذ (ستايل مرشح رسمي 😂)</option>
+                            </select>
+                        </div>
+
+                        <!-- الاسم بالكامل (مثال خفيف يختفي بمجرد الكتابة) -->
+                        <div>
+                            <label for="nameInput" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">اسمك اللي هيتكتب بالبنط العريض</label>
+                            <input type="text" id="nameInput" maxlength="32" placeholder="مثال: كيرلس القس كارلس" value=""
+                                class="w-full bg-slate-800 border border-slate-600 focus:border-yellow-400 rounded-xl px-3.5 py-2.5 text-white font-bold placeholder-slate-400/70 placeholder:font-normal outline-none transition">
+                        </div>
+
+                        <!-- اسم المجموعة الكشفية (ثابت) -->
+                        <div>
+                            <label class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">المجموعة الكشفية (ثابت)</label>
+                            <div class="w-full bg-slate-800/70 border border-yellow-500/40 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs sm:text-sm font-black text-yellow-400">⚜️ مجموعة سان جورج الكشفية</p>
+                                    <p class="text-[11px] text-slate-300 font-bold" dir="ltr" style="text-align: right;">St. George Scout • كنيسة مارجرجس ببا</p>
+                                </div>
+                                <span class="text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded-lg font-bold">مُثبّت</span>
+                            </div>
+                            <input type="hidden" id="teamInput" value="مجموعة سان جورج الكشفية • St. George Scout">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بطاقة 2: رفع الصورة وتظبيطها -->
+                <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-xl">
+                    <h2 class="text-base sm:text-lg font-black text-yellow-400 mb-4 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                        <span class="bg-yellow-500/20 text-yellow-400 w-7 h-7 rounded-lg flex items-center justify-center text-sm">2</span>
+                        <span>ارفع صورتك الرسمية</span>
+                    </h2>
+
+                    <!-- زر اختيار الصورة -->
+                    <label for="photoUpload" class="cursor-pointer flex flex-col items-center justify-center w-full border-2 border-dashed border-yellow-500/50 hover:border-yellow-400 bg-slate-800/60 hover:bg-slate-800 rounded-2xl p-4 transition text-center">
+                        <svg class="w-9 h-9 text-yellow-400 mb-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                        </svg>
+                        <span class="text-sm font-black text-white">اضغط هنا لاختيار صورتك من الاستوديو</span>
+                        <span class="text-xs text-slate-400 mt-1">يفضل صورة بالزي الكشفي أو صورة واضحة للوجه</span>
+                        <input type="file" id="photoUpload" accept="image/*" class="hidden">
+                    </label>
+
+                    <!-- أدوات التحكم في زوم ومكان الصورة -->
+                    <div id="photoControls" class="mt-4 space-y-3 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                <span>تكبير / تصغير الصورة (Zoom)</span>
+                                <span id="zoomValueText" class="text-yellow-400">100%</span>
+                            </div>
+                            <input type="range" id="zoomSlider" min="0.5" max="2.5" step="0.05" value="1" class="w-full">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-400 mb-1">تحريك يمين / شمال</label>
+                                <input type="range" id="offsetXSlider" min="-150" max="150" step="2" value="0" class="w-full">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-400 mb-1">تحريك فوق / تحت</label>
+                                <input type="range" id="offsetYSlider" min="-150" max="150" step="2" value="0" class="w-full">
+                            </div>
+                        </div>
+
+                        <button type="button" id="resetPhotoPosBtn" class="text-xs text-yellow-400 hover:underline font-bold">
+                            إعادة ضبط مكان الصورة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- بطاقة 3: المناسبة وشكل اليافطة -->
+                <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-xl">
+                    <h2 class="text-base sm:text-lg font-black text-yellow-400 mb-4 flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                        <span class="bg-yellow-500/20 text-yellow-400 w-7 h-7 rounded-lg flex items-center justify-center text-sm">3</span>
+                        <span>المناسبة ولون اليافطة</span>
+                    </h2>
+
+                    <div class="space-y-4">
+                        <!-- اختيار المناسبة الجاهزة -->
+                        <div>
+                            <label for="occasionSelect" class="block text-xs sm:text-sm font-bold text-slate-300 mb-1.5">المناسبة</label>
+                            <select id="occasionSelect" class="w-full bg-slate-800 border border-slate-600 focus:border-yellow-400 rounded-xl px-3.5 py-2.5 text-white font-bold outline-none transition">
+                                <option value="بمناسبة عيد الميلاد المجيد والعام الجديد">عيد الميلاد المجيد والعام الجديد 🎄</option>
+                                <option value="بمناسبة عيد الميلاد المجيد (الكريسماس)">عيد الميلاد المجيد (الكريسماس) ⭐</option>
+                                <option value="بمناسبة حلول العام الميلادي الجديد">حلول العام الميلادي الجديد 🎉</option>
+                                <option value="بمناسبة عيد الغطاس المجيد">عيد الغطاس المجيد</option>
+                                <option value="بمناسبة عيد القيامة المجيد">عيد القيامة المجيد</option>
+                                <option value="بمناسبة بدء العام الكشفي الجديد">بدء العام الكشفي الجديد ⚜️</option>
+                                <option value="custom">كتابة مناسبة خاصة...</option>
+                            </select>
+                        </div>
+
+                        <!-- حقل كتابة مناسبة مخصصة -->
+                        <div id="customOccasionWrapper" class="hidden">
+                            <label for="customOccasionInput" class="block text-xs font-bold text-yellow-400 mb-1">اكتب نص المناسبة</label>
+                            <input type="text" id="customOccasionInput" maxlength="45" placeholder="مثال: بمناسبة عيد الميلاد المجيد"
+                                class="w-full bg-slate-800 border border-yellow-500/50 rounded-xl px-3.5 py-2 text-white font-bold outline-none">
+                        </div>
+
+                        <!-- اختيار ألوان اليافطة (ستايلات الكريسماس) -->
+                        <div>
+                            <label class="block text-xs sm:text-sm font-bold text-slate-300 mb-2">ستايلات الكريسماس والاحتفال 🎄</label>
+                            <div class="grid grid-cols-2 gap-2.5" id="themeButtons">
+                                <button type="button" data-theme="christmasRoyal" class="theme-btn active-theme flex items-center gap-2 p-2.5 rounded-xl border-2 border-yellow-400 bg-slate-800 text-right transition">
+                                    <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-red-800 via-red-600 to-yellow-400 shrink-0 border border-white/40"></span>
+                                    <span class="text-xs font-black text-white">أحمر الكريسماس</span>
+                                </button>
+                                <button type="button" data-theme="christmasTree" class="theme-btn flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-slate-500 text-right transition">
+                                    <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-emerald-900 via-green-700 to-red-500 shrink-0 border border-white/40"></span>
+                                    <span class="text-xs font-black text-white">شجرة الميلاد</span>
+                                </button>
+                                <button type="button" data-theme="winterNight" class="theme-btn flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-slate-500 text-right transition">
+                                    <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-950 via-indigo-800 to-amber-300 shrink-0 border border-white/40"></span>
+                                    <span class="text-xs font-black text-white">ليلة الميلاد</span>
+                                </button>
+                                <button type="button" data-theme="velvetGold" class="theme-btn flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:border-slate-500 text-right transition">
+                                    <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-rose-950 via-amber-700 to-yellow-300 shrink-0 border border-white/40"></span>
+                                    <span class="text-xs font-black text-white">بهجة العام الجديد</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- رفع شعار مخصص للفريق (اختياري) -->
+                        <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                            <span class="text-xs text-slate-400 font-bold">شعار الفريق (اختياري):</span>
+                            <div class="flex items-center gap-2">
+                                <label for="logoUpload" class="cursor-pointer text-xs bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-slate-600 px-3 py-1.5 rounded-lg font-bold transition">
+                                    تغيير الشعار
+                                    <input type="file" id="logoUpload" accept="image/*" class="hidden">
+                                </label>
+                                <button type="button" id="resetLogoBtn" class="hidden text-xs text-red-400 hover:underline font-bold">الافتراضي</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- فوتر بسيط -->
+    <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-800/60 mt-6">
+        مجموعة سان جورج الكشفية • كنيسة الشهيد العظيم مارجرجس ببا ⚜️ — كُن مستعداً دائماً
+    </footer>
+
+    <!-- نافذة (Modal) مشاركة رابط مخصص للولاد (ميزة للقادة) -->
+    <div id="leaderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-yellow-500/40 rounded-2xl max-w-md w-full p-5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <h3 class="text-lg font-black text-yellow-400 flex items-center gap-2">
+                    <span>⚜️</span>
+                    <span>تجهيز رابط جاهز لفريقك</span>
+                </h3>
+                <button type="button" id="closeLeaderModalBtn" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                اختار المناسبة ولون اليافطة في الصفحة، وبعدين انسخ الرابط ده وابعته على جروب الواتساب؛ الولاد هيفتحوه يلاقوا اسم المجموعة والمناسبة جاهزين وميبقاش فاضل غير اسمهم وصورتهم!
+            </p>
+            <div class="bg-slate-950 border border-slate-700 rounded-xl p-2.5 mb-4">
+                <input type="text" id="shareableUrlInput" readonly class="w-full bg-transparent text-xs text-yellow-300 font-mono outline-none" dir="ltr">
+            </div>
+            <div class="flex gap-2">
+                <button type="button" id="copyShareUrlBtn" class="flex-1 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black py-2.5 px-4 rounded-xl transition">
+                    نسخ الرابط للواتساب
+                </button>
+                <button type="button" id="closeLeaderModalBtn2" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-xl transition">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة (Modal) عرض الصورة للحفظ المباشر على الموبايل (مفيدة جوه متصفح الواتساب/الفيسبوك) -->
+    <div id="mobileSaveModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-4 shadow-2xl text-center">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-black text-yellow-400">يافطتك جاهزة يا بطل!</span>
+                <button type="button" id="closeMobileSaveBtn" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            <p class="text-xs text-slate-300 mb-3 bg-slate-800 py-2 px-3 rounded-xl">
+                📱 لو شغال من الموبايل: دوس <strong class="text-yellow-400">ضغطة طويلة</strong> على الصورة اللي تحت واختار <strong class="text-yellow-400">"حفظ الصورة / Save Image"</strong>
+            </p>
+            <div class="rounded-xl overflow-hidden border border-slate-700 bg-slate-950 mb-3">
+                <img id="exportedPreviewImg" src="" alt="معاينة اليافطة" class="w-full h-auto block">
+            </div>
+            <button type="button" id="closeMobileSaveBtn2" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition">
+                تمام، رجوع للتعديل
+            </button>
+        </div>
+    </div>
+
+    <!-- رسالة تنبيه منبثقة (Toast) بدل alert() -->
+    <div id="toastNotification" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-2xl z-50 transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+        <span>✅</span>
+        <span id="toastMessage">تم بنجاح!</span>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * صانع يفط تهنئة كشافة سان جورج - المنطق البرمجي ورسم الكانفاس
+         * ============================================================================
+         */
+
+        // العناصر الأساسية في الصفحة
+        const canvas = document.getElementById('bannerCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // مدخلات البيانات
+        const rankSelect = document.getElementById('rankSelect');
+        const nameInput = document.getElementById('nameInput');
+        const teamInput = document.getElementById('teamInput');
+        const occasionSelect = document.getElementById('occasionSelect');
+        const customOccasionWrapper = document.getElementById('customOccasionWrapper');
+        const customOccasionInput = document.getElementById('customOccasionInput');
+
+        // مدخلات الصورة والتحكم فيها
+        const photoUpload = document.getElementById('photoUpload');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const zoomValueText = document.getElementById('zoomValueText');
+        const offsetXSlider = document.getElementById('offsetXSlider');
+        const offsetYSlider = document.getElementById('offsetYSlider');
+        const resetPhotoPosBtn = document.getElementById('resetPhotoPosBtn');
+
+        // مدخلات الشعار والمقاس والثيم
+        const logoUpload = document.getElementById('logoUpload');
+        const resetLogoBtn = document.getElementById('resetLogoBtn');
+        const ratioWideBtn = document.getElementById('ratioWideBtn');
+        const ratioSquareBtn = document.getElementById('ratioSquareBtn');
+        const themeButtons = document.querySelectorAll('.theme-btn');
+
+        // أزرار التحميل والنوافذ
+        const downloadBtn = document.getElementById('downloadBtn');
+        const previewImageBtn = document.getElementById('previewImageBtn');
+        const leaderModal = document.getElementById('leaderModal');
+        const toggleLeaderModalBtn = document.getElementById('toggleLeaderModalBtn');
+        const closeLeaderModalBtn = document.getElementById('closeLeaderModalBtn');
+        const closeLeaderModalBtn2 = document.getElementById('closeLeaderModalBtn2');
+        const shareableUrlInput = document.getElementById('shareableUrlInput');
+        const copyShareUrlBtn = document.getElementById('copyShareUrlBtn');
+
+        const mobileSaveModal = document.getElementById('mobileSaveModal');
+        const exportedPreviewImg = document.getElementById('exportedPreviewImg');
+        const closeMobileSaveBtn = document.getElementById('closeMobileSaveBtn');
+        const closeMobileSaveBtn2 = document.getElementById('closeMobileSaveBtn2');
+
+        // حالة التطبيق (App State)
+        const state = {
+            ratio: 'wide', // 'wide' (1200x675) أو 'square' (1080x1080)
+            theme: 'christmasRoyal',
+            userImage: null,
+            customLogo: null,
+            localFolderLogo: null,
+            stGeorgeLogoImg: null,
+            photoScale: 1,
+            photoOffsetX: 0,
+            photoOffsetY: 0,
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0
+        };
+
+        // لوحات الألوان لستايلات الكريسماس والعام الجديد
+        const THEMES = {
+            christmasRoyal: {
+                bgStart: '#991b1b',
+                bgMid: '#7f1d1d',
+                bgEnd: '#450a0a',
+                goldPrimary: '#facc15',
+                goldSecondary: '#fde047',
+                accentRibbon: '#15803d',
+                accentRibbonText: '#ffffff',
+                nameFill: '#ffffff',
+                nameStroke: '#3b0707',
+                occasionBoxBg: '#166534',
+                occasionBoxBorder: '#facc15',
+                occasionText: '#ffffff',
+                patternColor: 'rgba(250, 204, 21, 0.08)'
+            },
+            christmasTree: {
+                bgStart: '#065f46',
+                bgMid: '#064e3b',
+                bgEnd: '#022c22',
+                goldPrimary: '#facc15',
+                goldSecondary: '#fef08a',
+                accentRibbon: '#dc2626',
+                accentRibbonText: '#ffffff',
+                nameFill: '#ffffff',
+                nameStroke: '#022c22',
+                occasionBoxBg: '#991b1b',
+                occasionBoxBorder: '#facc15',
+                occasionText: '#ffffff',
+                patternColor: 'rgba(255, 255, 255, 0.07)'
+            },
+            winterNight: {
+                bgStart: '#1e3a8a',
+                bgMid: '#172554',
+                bgEnd: '#090d16',
+                goldPrimary: '#fbbf24',
+                goldSecondary: '#fde68a',
+                accentRibbon: '#b91c1c',
+                accentRibbonText: '#ffffff',
+                nameFill: '#ffffff',
+                nameStroke: '#090d16',
+                occasionBoxBg: '#facc15',
+                occasionBoxBorder: '#ffffff',
+                occasionText: '#0f172a',
+                patternColor: 'rgba(147, 197, 253, 0.08)'
+            },
+            velvetGold: {
+                bgStart: '#881337',
+                bgMid: '#4c0519',
+                bgEnd: '#1f020a',
+                goldPrimary: '#facc15',
+                goldSecondary: '#fef08a',
+                accentRibbon: '#facc15',
+                accentRibbonText: '#1f020a',
+                nameFill: '#ffffff',
+                nameStroke: '#2a030e',
+                occasionBoxBg: '#fef3c7',
+                occasionBoxBorder: '#facc15',
+                occasionText: '#78350f',
+                patternColor: 'rgba(253, 224, 71, 0.08)'
+            }
+        };
+
+        /**
+         * تجهيز شعار كشافة سان جورج الرسمي:
+         * 1. يبحث تلقائياً عن ملف logo.png أو logo.jpg في نفس فولدر الصفحة
+         * 2. يجهز شعاراً متجهاً احتياطياً في حال عدم وجود الملف بعد
+         */
+        function initStGeorgeScoutLogo() {
+            const localCandidates = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.webp'];
+            let candidateIndex = 0;
+
+            function tryLoadLocalLogo() {
+                if (candidateIndex >= localCandidates.length) return;
+                const fileName = localCandidates[candidateIndex++];
+                const img = new Image();
+                img.onload = () => {
+                    state.localFolderLogo = img;
+                    // تحديث أيقونة الهيدر أيضاً بنفس الشعار
+                    const headerImg = document.getElementById('headerLogoImg');
+                    const headerSvg = document.getElementById('headerLogoSvg');
+                    if (headerImg && headerSvg) {
+                        headerImg.src = fileName;
+                        headerImg.classList.remove('hidden');
+                        headerSvg.classList.add('hidden');
+                    }
+                    drawBanner();
+                };
+                img.onerror = () => {
+                    tryLoadLocalLogo();
+                };
+                img.src = fileName;
+            }
+            tryLoadLocalLogo();
+
+            const svgMarkup = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+                <defs>
+                    <path id="leftArc" d="M 48,175 A 112,112 0 0,1 146,48" />
+                    <path id="rightArc" d="M 172,48 A 112,112 0 0,1 272,175" />
+                </defs>
+                <circle cx="160" cy="160" r="154" fill="#ffffff"/>
+                <circle cx="160" cy="160" r="147" fill="none" stroke="#111827" stroke-width="2" stroke-opacity="0.15"/>
+                <text fill="#111827" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="16.5" letter-spacing="0.4">
+                    <textPath href="#leftArc" startOffset="50%" text-anchor="middle">Saint George Scout</textPath>
+                </text>
+                <text fill="#111827" font-family="Tahoma, Arial, sans-serif" font-weight="bold" font-size="18.5">
+                    <textPath href="#rightArc" startOffset="50%" text-anchor="middle">كشافة سان جورج</textPath>
+                </text>
+                <path d="M 160,64 C 186,95 194,125 182,150 C 175,142 167,138 160,136 C 153,138 145,142 138,150 C 126,125 134,95 160,64 Z"
+                      fill="#ffffff" stroke="#111827" stroke-width="3.2" stroke-linejoin="round"/>
+                <g fill="#111827" transform="translate(160, 108) scale(0.85)">
+                    <circle cx="-2" cy="-14" r="4"/>
+                    <path d="M -12,-6 C -6,-10 4,-9 10,-3 C 14,2 10,9 2,11 L -8,14 L -14,7 C -10,3 -8,-2 -12,-6 Z"/>
+                    <path d="M -16,13 C -6,11 6,12 16,16 C 9,19 -6,19 -16,13 Z"/>
+                    <line x1="-12" y1="-16" x2="14" y2="14" stroke="#111827" stroke-width="2.2"/>
+                </g>
+                <path d="M 142,152 C 110,122 68,142 82,184 C 87,198 100,206 112,205 C 96,196 93,174 106,164 C 118,155 133,160 142,168 Z" fill="#111827"/>
+                <path d="M 86,188 C 72,165 88,132 122,138" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>
+                <text x="106" y="182" fill="#111827" font-family="Georgia, serif" font-weight="bold" font-size="25" text-anchor="middle">S</text>
+                <path d="M 178,152 C 210,122 252,142 238,184 C 233,198 220,206 208,205 C 224,196 227,174 214,164 C 202,155 187,160 178,168 Z" fill="#111827"/>
+                <path d="M 234,188 C 248,165 232,132 198,138" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>
+                <text x="214" y="182" fill="#111827" font-family="Georgia, serif" font-weight="bold" font-size="25" text-anchor="middle">G</text>
+                <path d="M 160,141 L 169,156 L 165,172 L 186,168 L 198,175 L 186,182 L 165,178 L 168,236 L 160,250 L 152,236 L 155,178 L 134,182 L 122,175 L 134,168 L 155,172 L 151,156 Z" fill="#111827"/>
+                <path d="M 148,186 C 142,216 116,232 104,218 C 96,208 106,196 115,202" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+                <path d="M 172,186 C 178,216 204,232 216,218 C 224,208 214,196 205,202" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+                <g fill="#111827">
+                    <path d="M 62,190 L 74,202 L 66,204 Z"/>
+                    <path d="M 68,204 L 82,216 L 73,218 Z"/>
+                    <path d="M 76,217 L 92,229 L 82,232 Z"/>
+                    <path d="M 86,230 L 112,244 L 103,249 L 83,234 Z"/>
+                    <path d="M 258,190 L 246,202 L 254,204 Z"/>
+                    <path d="M 252,204 L 238,216 L 247,218 Z"/>
+                    <path d="M 244,217 L 228,229 L 238,232 Z"/>
+                    <path d="M 234,230 L 208,244 L 217,249 L 237,234 Z"/>
+                </g>
+                <text x="160" y="274" fill="#111827" font-family="Tahoma, Arial, sans-serif" font-weight="bold" font-size="13" text-anchor="middle">مطرانية ببا والفشن وسمسطا</text>
+                <text x="160" y="292" fill="#111827" font-family="Tahoma, Arial, sans-serif" font-weight="bold" font-size="12.5" text-anchor="middle">كنيسة الشهيد العظيم مارجرجس ببا</text>
+            </svg>`;
+
+            try {
+                const svgBlob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+                const img = new Image();
+                img.onload = () => {
+                    state.stGeorgeLogoImg = img;
+                    URL.revokeObjectURL(url);
+                    drawBanner();
+                };
+                img.src = url;
+            } catch (e) {
+                console.warn('تم التحويل للرسم المباشر للشعار:', e);
+            }
+        }
+
+        /**
+         * رسم احتياطي مباشر لشعار كشافة سان جورج على الكانفاس
+         */
+        function drawDefaultScoutEmblem(ctx, cx, cy, size, primaryColor) {
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            ctx.beginPath();
+            ctx.arc(0, 0, size, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = primaryColor;
+            ctx.stroke();
+
+            if (state.stGeorgeLogoImg) {
+                ctx.beginPath();
+                ctx.arc(0, 0, size - 3, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.drawImage(state.stGeorgeLogoImg, -(size - 3), -(size - 3), (size - 3) * 2, (size - 3) * 2);
+            } else {
+                const s = size * 0.55;
+                ctx.fillStyle = '#111827';
+                ctx.beginPath();
+                ctx.moveTo(0, -s * 1.15);
+                ctx.bezierCurveTo(s * 0.45, -s * 0.5, s * 0.35, s * 0.2, 0, s * 0.5);
+                ctx.bezierCurveTo(-s * 0.35, s * 0.2, -s * 0.45, -s * 0.5, 0, -s * 1.15);
+                ctx.fill();
+
+                ctx.fillRect(-s * 0.08, -s * 0.3, s * 0.16, s * 1.15);
+                ctx.fillRect(-s * 0.38, s * 0.05, s * 0.76, s * 0.14);
+            }
+
+            ctx.restore();
+        }
+
+        /**
+         * رسم صورة شعار (من الفولدر أو مرفوعة) داخل دائرة بيضاء أنيقة مع الحفاظ على أبعادها كاملة بدون قص
+         */
+        function drawContainedBadgeLogo(ctx, img, cx, cy, radius, borderColor) {
+            ctx.save();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius - 4, 0, Math.PI * 2);
+            ctx.clip();
+
+            const innerBox = (radius - 10) * 2;
+            const scale = Math.min(innerBox / img.width, innerBox / img.height);
+            const drawW = img.width * scale;
+            const drawH = img.height * scale;
+            ctx.drawImage(img, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.lineWidth = 4.5;
+            ctx.strokeStyle = borderColor;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        /**
+         * رسم نجمة عيد الميلاد الرباعية المتلألئة
+         */
+        function drawStar(ctx, cx, cy, outerR, innerR, color) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            for (let i = 0; i < 8; i++) {
+                const r = i % 2 === 0 ? outerR : innerR;
+                const angle = (i * Math.PI) / 4;
+                const x = Math.cos(angle) * r;
+                const y = Math.sin(angle) * r;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        /**
+         * رسم ندفة ثلج (Snowflake) للكريسماس
+         */
+        function drawSnowflake(ctx, cx, cy, r, color) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            for (let i = 0; i < 6; i++) {
+                ctx.rotate(Math.PI / 3);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -r);
+                ctx.moveTo(0, -r * 0.55);
+                ctx.lineTo(-r * 0.25, -r * 0.8);
+                ctx.moveTo(0, -r * 0.55);
+                ctx.lineTo(r * 0.25, -r * 0.8);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        /**
+         * رسم أوراق الهولي الخضراء وثمار الكريسماس الحمراء في أركان اليافطة
+         */
+        function drawHollyCorner(ctx, cx, cy, rotationRad) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotationRad);
+
+            // ورقتان خضراوان
+            ctx.fillStyle = '#15803d';
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.ellipse(-14, -6, 16, 8, -0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.ellipse(14, -6, 16, 8, 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 3 ثمار حمراء
+            const berries = [
+                { x: 0, y: 2 },
+                { x: -6, y: -4 },
+                { x: 6, y: -4 }
+            ];
+            berries.forEach(b => {
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+                ctx.strokeStyle = '#fef08a';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+
+            ctx.restore();
+        }
+
+        /**
+         * رسم شارة علم مصر الصغيرة أسفل اليافطة (تاتش يفط التهاني المصرية)
+         */
+        function drawEgyptianFlagBadge(ctx, x, y, w, h) {
+            ctx.save();
+            drawRoundRect(ctx, x, y, w, h, 4);
+            ctx.clip();
+
+            ctx.fillStyle = '#ce1126';
+            ctx.fillRect(x, y, w, h / 3);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x, y + h / 3, w, h / 3);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(x, y + (h * 2) / 3, w, h / 3);
+
+            // نسر ذهبي رمزي في المنتصف
+            ctx.fillStyle = '#c09300';
+            ctx.beginPath();
+            ctx.arc(x + w / 2, y + h / 2, h * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.lineWidth = 1.5;
+            drawRoundRect(ctx, x, y, w, h, 4);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        /**
+         * الدالة الرئيسية لرسم اليافطة بالكامل على الكانفاس
+         */
+        function drawBanner() {
+            const isWide = state.ratio === 'wide';
+            const W = isWide ? 1200 : 1080;
+            const H = isWide ? 675 : 1080;
+
+            canvas.width = W;
+            canvas.height = H;
+
+            const t = THEMES[state.theme] || THEMES.christmasRoyal;
+
+            // 1. رسم الخلفية المتدرجة الفخمة
+            const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+            bgGrad.addColorStop(0, t.bgStart);
+            bgGrad.addColorStop(0.5, t.bgMid);
+            bgGrad.addColorStop(1, t.bgEnd);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, W, H);
+
+            // نقش خطوط مائلة خفيفة في الخلفية لإعطاء عمق بصري
+            ctx.save();
+            ctx.strokeStyle = t.patternColor;
+            ctx.lineWidth = 18;
+            for (let i = -H; i < W + H; i += 65) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i - H, H);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 2. رسم الإطار الخارجي والداخلي المزخرف لليافطة
+            ctx.save();
+            ctx.strokeStyle = t.goldPrimary;
+            ctx.lineWidth = 8;
+            drawRoundRect(ctx, 22, 22, W - 44, H - 44, 28);
+            ctx.stroke();
+
+            ctx.strokeStyle = t.accentRibbon;
+            ctx.lineWidth = 3;
+            drawRoundRect(ctx, 36, 36, W - 72, H - 72, 20);
+            ctx.stroke();
+            ctx.restore();
+
+            // زخارف أوراق الهولي في الأركان + شارة علم مصر
+            drawHollyCorner(ctx, 56, H - 56, 0.4);
+            drawHollyCorner(ctx, W - 56, 56, -2.7);
+            drawEgyptianFlagBadge(ctx, 96, H - 72, 54, 34);
+
+            // 3. نجوم الميلاد وندف الثلج المتلألئة
+            drawStar(ctx, W * 0.22, H * 0.14, 14, 4, t.goldSecondary);
+            drawStar(ctx, W * 0.56, H * 0.12, 16, 5, t.goldPrimary);
+            drawStar(ctx, W * 0.62, H * 0.85, 13, 4, t.goldSecondary);
+
+            drawSnowflake(ctx, W * 0.16, H * 0.42, 15, 'rgba(255,255,255,0.28)');
+            drawSnowflake(ctx, W * 0.61, H * 0.22, 18, 'rgba(255,255,255,0.32)');
+            drawSnowflake(ctx, W * 0.64, H * 0.68, 16, 'rgba(255,255,255,0.25)');
+            drawSnowflake(ctx, W * 0.20, H * 0.76, 14, 'rgba(255,255,255,0.25)');
+
+            // تحديد إحداثيات برواز الصورة والنصوص بناءً على المقاس (عريض أو مربع)
+            const photoCx = isWide ? W * 0.78 : W * 0.5;
+            const photoCy = isWide ? H * 0.50 : H * 0.28;
+            const photoR = isWide ? 178 : 175;
+
+            // 4. هالة ضوئية وأشعة ذهبية خلف صورة الكشاف
+            ctx.save();
+            const haloGrad = ctx.createRadialGradient(photoCx, photoCy, photoR * 0.5, photoCx, photoCy, photoR * 1.45);
+            haloGrad.addColorStop(0, 'rgba(250, 204, 21, 0.45)');
+            haloGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.fillStyle = haloGrad;
+            ctx.beginPath();
+            ctx.arc(photoCx, photoCy, photoR * 1.45, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // 5. رسم صورة الكشاف داخل البرواز الدائري
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(photoCx, photoCy, photoR, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            // خلفية داخلية للبرواز
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(photoCx - photoR, photoCy - photoR, photoR * 2, photoR * 2);
+
+            if (state.userImage) {
+                const img = state.userImage;
+                const baseScale = Math.max((photoR * 2) / img.width, (photoR * 2) / img.height);
+                const finalScale = baseScale * state.photoScale;
+                const drawW = img.width * finalScale;
+                const drawH = img.height * finalScale;
+                const drawX = photoCx - drawW / 2 + state.photoOffsetX;
+                const drawY = photoCy - drawH / 2 + state.photoOffsetY;
+
+                ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            } else {
+                // صورة افتراضية أنيقة قبل رفع صورة الكشاف
+                ctx.fillStyle = '#334155';
+                ctx.beginPath();
+                ctx.arc(photoCx, photoCy - 28, 52, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(photoCx, photoCy + 115, 105, Math.PI, 0);
+                ctx.fill();
+
+                ctx.fillStyle = '#facc15';
+                ctx.font = '800 22px Cairo, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('ضع صورتك هنا', photoCx, photoCy + 115);
+            }
+            ctx.restore();
+
+            // 6. رسم إطار البرواز الدائري المزدوج حول الصورة
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(photoCx, photoCy, photoR + 4, 0, Math.PI * 2);
+            ctx.lineWidth = 9;
+            ctx.strokeStyle = t.goldPrimary;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(photoCx, photoCy, photoR + 11, 0, Math.PI * 2);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+            ctx.restore();
+
+            // 7. رسم شعار كشافة سان جورج (المرفوع يدوياً -> أو الموجود في الفولدر -> أو المرسوم افتراضياً)
+            const logoCx = isWide ? 105 : 115;
+            const logoCy = isWide ? 105 : 115;
+            const logoR = isWide ? 55 : 58;
+
+            const activeLogoImg = state.customLogo || state.localFolderLogo;
+            if (activeLogoImg) {
+                drawContainedBadgeLogo(ctx, activeLogoImg, logoCx, logoCy, logoR, t.goldPrimary);
+            } else {
+                drawDefaultScoutEmblem(ctx, logoCx, logoCy, logoR, t.goldPrimary);
+            }
+
+            // 8. رسم النصوص العربية (الرتبة، الاسم، الفريق، التهنئة، المناسبة)
+            const rankText = rankSelect.value || 'الكشاف';
+            const rawName = nameInput.value.trim() || 'اكتب اسمك هنا';
+            const teamText = 'مجموعة سان جورج الكشفية • St. George Scout';
+            const occasionText = occasionSelect.value === 'custom'
+                ? (customOccasionInput.value.trim() || 'بمناسبة عيد الميلاد المجيد والعام الجديد')
+                : occasionSelect.value;
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.direction = 'rtl';
+
+            // إزاحة مركز النصوص لليمين قليلاً في اليافطة العريضة لضمان مسافة واسعة ومريحة بعيداً عن اللوجو
+            const textCenterX = isWide ? W * 0.375 : W * 0.5;
+            const maxTextWidth = isWide ? W * 0.46 : W * 0.88;
+
+            // أ) شارة الرتبة / اللقب الكشفي
+            const rankY = isWide ? 104 : 515;
+            ctx.save();
+            ctx.font = '800 28px Cairo, sans-serif';
+            const rankMetrics = ctx.measureText(rankText);
+            const pillW = Math.max(170, rankMetrics.width + 64);
+            const pillH = 48;
+
+            ctx.fillStyle = t.accentRibbon;
+            drawRoundRect(ctx, textCenterX - pillW / 2, rankY - pillH / 2, pillW, pillH, 24);
+            ctx.fill();
+
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = t.goldPrimary;
+            ctx.stroke();
+
+            ctx.fillStyle = t.accentRibbonText;
+            ctx.fillText(rankText, textCenterX, rankY + 2);
+            ctx.restore();
+
+            // ب) الاسم الكبير بالبنط العريض (مع تصغير تلقائي لو الاسم طويل)
+            const nameY = isWide ? 205 : 595;
+            let nameFontSize = isWide ? 70 : 78;
+            ctx.font = `900 ${nameFontSize}px Cairo, sans-serif`;
+            while (ctx.measureText(rawName).width > maxTextWidth && nameFontSize > 36) {
+                nameFontSize -= 4;
+                ctx.font = `900 ${nameFontSize}px Cairo, sans-serif`;
+            }
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+            ctx.shadowBlur = 14;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 6;
+
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = t.nameStroke;
+            ctx.strokeText(rawName, textCenterX, nameY);
+
+            ctx.fillStyle = t.nameFill;
+            ctx.fillText(rawName, textCenterX, nameY);
+            ctx.restore();
+
+            // ج) اسم المجموعة الكشفية الثابت
+            const teamY = isWide ? 276 : 668;
+            ctx.save();
+            ctx.font = '800 25px Cairo, sans-serif';
+            ctx.fillStyle = t.goldPrimary;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            ctx.shadowBlur = 6;
+            ctx.fillText(`⚜️ ${teamText} ⚜️`, textCenterX, teamY, maxTextWidth);
+            ctx.restore();
+
+            // خط فاصل ذهبي مزخرف
+            const dividerY = isWide ? 320 : 715;
+            ctx.save();
+            const lineGrad = ctx.createLinearGradient(textCenterX - maxTextWidth * 0.4, dividerY, textCenterX + maxTextWidth * 0.4, dividerY);
+            lineGrad.addColorStop(0, 'rgba(250, 204, 21, 0)');
+            lineGrad.addColorStop(0.5, t.goldPrimary);
+            lineGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.strokeStyle = lineGrad;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(textCenterX - maxTextWidth * 0.4, dividerY);
+            ctx.lineTo(textCenterX + maxTextWidth * 0.4, dividerY);
+            ctx.stroke();
+            ctx.restore();
+
+            // د) جملة التهنئة الكلاسيكية بتاعة اليفط
+            const greetY = isWide ? 370 : 770;
+            ctx.save();
+            ctx.font = '800 30px Cairo, sans-serif';
+            ctx.fillStyle = '#f8fafc';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 6;
+            ctx.fillText('يهنئ الشعب المصري العظيم والأخوة الأقباط', textCenterX, greetY, maxTextWidth);
+            ctx.restore();
+
+            // هـ) شريط المناسبة البارز
+            const occY = isWide ? 450 : 855;
+            const boxW = maxTextWidth * 0.98;
+            const boxH = 74;
+
+            ctx.save();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetY = 5;
+
+            ctx.fillStyle = t.occasionBoxBg;
+            drawRoundRect(ctx, textCenterX - boxW / 2, occY - boxH / 2, boxW, boxH, 18);
+            ctx.fill();
+
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = t.occasionBoxBorder;
+            ctx.stroke();
+
+            // ضبط حجم خط المناسبة ليناسب الصندوق
+            let occFontSize = 32;
+            ctx.font = `900 ${occFontSize}px Cairo, sans-serif`;
+            while (ctx.measureText(occasionText).width > boxW - 36 && occFontSize > 19) {
+                occFontSize -= 2;
+                ctx.font = `900 ${occFontSize}px Cairo, sans-serif`;
+            }
+
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.fillStyle = t.occasionText;
+            ctx.fillText(occasionText, textCenterX, occY + 2);
+            ctx.restore();
+
+            // و) الخاتمة والشعار الكشفي أسفل اليافطة
+            const footerY = isWide ? 545 : 955;
+            ctx.save();
+            ctx.font = '700 23px Cairo, sans-serif';
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillText('كنيسة الشهيد العظيم مارجرجس ببا • كل عام وأنتم بخير', textCenterX, footerY, maxTextWidth);
+
+            ctx.font = '800 22px Cairo, sans-serif';
+            ctx.fillStyle = t.goldPrimary;
+            ctx.fillText('« كُن مُستعداً دائماً »', textCenterX, footerY + 38);
+            ctx.restore();
+        }
+
+        // ============================================================================
+        // ربط الأحداث (Event Listeners)
+        // ============================================================================
+
+        // تحديث الرسم فور كتابة أي نص
+        [rankSelect, nameInput, teamInput, customOccasionInput].forEach(el => {
+            el.addEventListener('input', drawBanner);
+        });
+
+        // إظهار/إخفاء حقل المناسبة المخصصة
+        occasionSelect.addEventListener('change', () => {
+            if (occasionSelect.value === 'custom') {
+                customOccasionWrapper.classList.remove('hidden');
+                customOccasionInput.focus();
+            } else {
+                customOccasionWrapper.classList.add('hidden');
+            }
+            drawBanner();
+        });
+
+        // رفع الصورة الشخصية
+        photoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.userImage = img;
+                    state.photoScale = 1;
+                    state.photoOffsetX = 0;
+                    state.photoOffsetY = 0;
+                    zoomSlider.value = 1;
+                    zoomValueText.textContent = '100%';
+                    offsetXSlider.value = 0;
+                    offsetYSlider.value = 0;
+                    drawBanner();
+                    showToast('تم تركيب صورتك بنجاح! تقدر تحركها أو تكبرها');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // رفع شعار مخصص للفريق
+        logoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.customLogo = img;
+                    resetLogoBtn.classList.remove('hidden');
+                    drawBanner();
+                    showToast('تم إضافة شعار فريقك!');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        resetLogoBtn.addEventListener('click', () => {
+            state.customLogo = null;
+            logoUpload.value = '';
+            resetLogoBtn.classList.add('hidden');
+            drawBanner();
+        });
+
+        // أدوات تحريك وزوم الصورة
+        zoomSlider.addEventListener('input', () => {
+            state.photoScale = parseFloat(zoomSlider.value);
+            zoomValueText.textContent = `${Math.round(state.photoScale * 100)}%`;
+            drawBanner();
+        });
+
+        offsetXSlider.addEventListener('input', () => {
+            state.photoOffsetX = parseInt(offsetXSlider.value, 10);
+            drawBanner();
+        });
+
+        offsetYSlider.addEventListener('input', () => {
+            state.photoOffsetY = parseInt(offsetYSlider.value, 10);
+            drawBanner();
+        });
+
+        resetPhotoPosBtn.addEventListener('click', () => {
+            state.photoScale = 1;
+            state.photoOffsetX = 0;
+            state.photoOffsetY = 0;
+            zoomSlider.value = 1;
+            zoomValueText.textContent = '100%';
+            offsetXSlider.value = 0;
+            offsetYSlider.value = 0;
+            drawBanner();
+        });
+
+        // سحب الصورة بالماوس أو اللمس مباشرة داخل الكانفاس
+        function getPointerCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function startDrag(e) {
+            if (!state.userImage) return;
+            state.isDragging = true;
+            const pos = getPointerCoords(e);
+            state.dragStartX = pos.x - state.photoOffsetX;
+            state.dragStartY = pos.y - state.photoOffsetY;
+        }
+
+        function onDrag(e) {
+            if (!state.isDragging || !state.userImage) return;
+            e.preventDefault();
+            const pos = getPointerCoords(e);
+            state.photoOffsetX = Math.max(-200, Math.min(200, Math.round(pos.x - state.dragStartX)));
+            state.photoOffsetY = Math.max(-200, Math.min(200, Math.round(pos.y - state.dragStartY)));
+            offsetXSlider.value = Math.max(-150, Math.min(150, state.photoOffsetX));
+            offsetYSlider.value = Math.max(-150, Math.min(150, state.photoOffsetY));
+            drawBanner();
+        }
+
+        function stopDrag() {
+            state.isDragging = false;
+        }
+
+        canvas.addEventListener('mousedown', startDrag);
+        canvas.addEventListener('mousemove', onDrag);
+        window.addEventListener('mouseup', stopDrag);
+
+        canvas.addEventListener('touchstart', startDrag, { passive: false });
+        canvas.addEventListener('touchmove', onDrag, { passive: false });
+        window.addEventListener('touchend', stopDrag);
+
+        // تبديل مقاس اليافطة (عريض / مربع)
+        ratioWideBtn.addEventListener('click', () => {
+            state.ratio = 'wide';
+            ratioWideBtn.className = 'px-2.5 py-1 rounded-lg font-bold bg-yellow-500 text-slate-950 transition';
+            ratioSquareBtn.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-300 hover:text-white transition';
+            drawBanner();
+        });
+
+        ratioSquareBtn.addEventListener('click', () => {
+            state.ratio = 'square';
+            ratioSquareBtn.className = 'px-2.5 py-1 rounded-lg font-bold bg-yellow-500 text-slate-950 transition';
+            ratioWideBtn.className = 'px-2.5 py-1 rounded-lg font-bold text-slate-300 hover:text-white transition';
+            drawBanner();
+        });
+
+        // أزرار الثيمات اللونية
+        themeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setTheme(btn.dataset.theme);
+            });
+        });
+
+        // تحميل الصورة كملف PNG
+        downloadBtn.addEventListener('click', () => {
+            try {
+                const dataUrl = canvas.toDataURL('image/png', 1.0);
+                const cleanName = (nameInput.value.trim() || 'كشاف').replace(/\s+/g, '-');
+                const link = document.createElement('a');
+                link.download = `يافطة-تهنئة-${cleanName}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('جاري تحميل يافطتك بجودة عالية!');
+            } catch (err) {
+                console.error(err);
+                showToast('حصلت مشكلة في التحميل المباشر، جرب زرار "حفظ للموبايل"', true);
+            }
+        });
+
+        // فتح نافذة الحفظ للموبايل (لحل مشكلة متصفحات واتساب وفيسبوك الداخلية)
+        previewImageBtn.addEventListener('click', () => {
+            exportedPreviewImg.src = canvas.toDataURL('image/png', 1.0);
+            mobileSaveModal.classList.remove('hidden');
+            mobileSaveModal.classList.add('flex');
+        });
+
+        [closeMobileSaveBtn, closeMobileSaveBtn2].forEach(btn => {
+            btn.addEventListener('click', () => {
+                mobileSaveModal.classList.add('hidden');
+                mobileSaveModal.classList.remove('flex');
+            });
+        });
+
+        // نافذة تجهيز رابط للقائد
+        toggleLeaderModalBtn.addEventListener('click', () => {
+            const url = new URL(window.location.href.split('?')[0]);
+            const occ = occasionSelect.value === 'custom' ? customOccasionInput.value.trim() : occasionSelect.value;
+            if (occ) {
+                url.searchParams.set('occ', occ);
+            }
+            url.searchParams.set('theme', state.theme);
+
+            shareableUrlInput.value = url.toString();
+            leaderModal.classList.remove('hidden');
+            leaderModal.classList.add('flex');
+        });
+
+        [closeLeaderModalBtn, closeLeaderModalBtn2].forEach(btn => {
+            btn.addEventListener('click', () => {
+                leaderModal.classList.add('hidden');
+                leaderModal.classList.remove('flex');
+            });
+        });
+
+        // نسخ الرابط باستخدام document.execCommand لضمان العمل في كل البيئات
+        copyShareUrlBtn.addEventListener('click', () => {
+            shareableUrlInput.select();
+            shareableUrlInput.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast('تم نسخ الرابط! ابعته للولاد على الواتساب');
+            } catch (err) {
+                showToast('انسخ الرابط يدوياً من المربع', true);
+            }
+        });
+
+        /**
+         * دوال مساعدة للرسم وتغيير الثيم والتنبيهات
+         */
+        function drawRoundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function setTheme(themeKey) {
+            if (!THEMES[themeKey]) return;
+            state.theme = themeKey;
+            themeButtons.forEach(btn => {
+                if (btn.dataset.theme === themeKey) {
+                    btn.classList.remove('border-slate-700', 'bg-slate-800/80');
+                    btn.classList.add('border-2', 'border-yellow-400', 'bg-slate-800');
+                } else {
+                    btn.classList.remove('border-2', 'border-yellow-400', 'bg-slate-800');
+                    btn.classList.add('border-slate-700', 'bg-slate-800/80');
+                }
+            });
+            drawBanner();
+        }
+
+        let toastTimeout = null;
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.textContent = message;
+            toast.classList.remove('bg-emerald-600', 'bg-red-600', 'opacity-0');
+            toast.classList.add(isError ? 'bg-red-600' : 'bg-emerald-600', 'opacity-100');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        function loadParamsFromUrl() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const occParam = params.get('occ');
+                const themeParam = params.get('theme');
+
+                if (occParam) {
+                    const matchedOption = Array.from(occasionSelect.options).find(opt => opt.value === occParam);
+                    if (matchedOption) {
+                        occasionSelect.value = occParam;
+                    } else {
+                        occasionSelect.value = 'custom';
+                        customOccasionWrapper.classList.remove('hidden');
+                        customOccasionInput.value = occParam;
+                    }
+                }
+                if (themeParam && THEMES[themeParam]) {
+                    setTheme(themeParam);
+                }
+            } catch (e) {
+                console.warn('تعذر قراءة بيانات الرابط:', e);
+            }
+        }
+
+        // بدء التشغيل بعد تحميل الخطوط العربية لضمان ظهورها بشكل سليم
+        window.addEventListener('load', () => {
+            initStGeorgeScoutLogo();
+            loadParamsFromUrl();
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => {
+                    drawBanner();
+                });
+            } else {
+                drawBanner();
+            }
+        });
+    </script>
+</body>
+</html>
